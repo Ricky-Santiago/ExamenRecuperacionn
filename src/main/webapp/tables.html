@@ -528,7 +528,6 @@
                                                     <label for="editLogiMedi" class="form-label">Login</label>
                                                     <input type="text" class="form-control" id="editLogiMedi" name="logiMedi" required>
                                                 </div>
-                                                <!-- Puedes agregar campo contraseña si deseas aquí -->
                                             </div>
                                             <div class="modal-footer">
                                                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
@@ -541,10 +540,12 @@
 
                             <script>
                                 function formatDate(dateStr) {
+                                    if (!dateStr)
+                                        return "";
                                     const date = new Date(dateStr);
                                     if (isNaN(date))
                                         return "";
-                                    return date.toISOString().split('T')[0];
+                                    return date.toISOString().slice(0, 10);
                                 }
 
                                 // Cargar médicos y poblar tabla
@@ -599,6 +600,7 @@
                                         })
                                         .catch(error => console.error('Error cargando médicos:', error));
                             </script>
+
 
 
                         </body>

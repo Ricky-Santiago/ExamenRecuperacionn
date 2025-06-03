@@ -10,10 +10,9 @@ import javax.persistence.Persistence;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.*;
-import util.HashUtil;
 
-@WebServlet(name = "AgregarMedico", urlPatterns = {"/agregarMedico"})
-public class AgregarMedico extends HttpServlet {
+@WebServlet(name = "EditarMedico", urlPatterns = {"/editarMedico"})
+public class EditarMedico extends HttpServlet {
 
     private MedicoJpaController controller;
 
@@ -29,45 +28,47 @@ public class AgregarMedico extends HttpServlet {
             throws ServletException, IOException {
 
         // Obtener parámetros
+        String idStr = request.getParameter("codiMedi");
         String dni = request.getParameter("ndniMedi");
         String appa = request.getParameter("appaMedi");
         String apma = request.getParameter("apmaMedi");
         String nombre = request.getParameter("nombMedi");
         String fechaStr = request.getParameter("fechNaciMedi");
         String login = request.getParameter("logiMedi");
-        String password = request.getParameter("passMedi");
+        // Para editar la contraseña, si quieres manejarla, podrías agregar aquí
 
-        if (dni == null || appa == null || apma == null || nombre == null
-                || fechaStr == null || login == null || password == null
-                || dni.isEmpty() || appa.isEmpty() || apma.isEmpty()
-                || nombre.isEmpty() || fechaStr.isEmpty() || login.isEmpty() || password.isEmpty()) {
+        if (idStr == null || dni == null || appa == null || apma == null || nombre == null
+                || fechaStr == null || login == null
+                || idStr.isEmpty() || dni.isEmpty() || appa.isEmpty() || apma.isEmpty()
+                || nombre.isEmpty() || fechaStr.isEmpty() || login.isEmpty()) {
             response.sendRedirect("tables.html?error=missing");
             return;
         }
 
         try {
-            // Parsear fecha
+            int id = Integer.parseInt(idStr);
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
             Date fechaNacimiento = sdf.parse(fechaStr);
 
-            // Hashear contraseña
-            String hashedPass = HashUtil.hashPassword(password);
+            Medico medico = controller.findMedico(id);
+            if (medico == null) {
+                response.sendRedirect("tables.html?error=notfound");
+                return;
+            }
 
-            // Crear objeto Medico
-            Medico medico = new Medico();
             medico.setNdniMedi(dni);
             medico.setAppaMedi(appa);
             medico.setApmaMedi(apma);
             medico.setNombMedi(nombre);
             medico.setFechNaciMedi(fechaNacimiento);
             medico.setLogiMedi(login);
-            medico.setPassMedi(hashedPass);
 
-            // Guardar en BD
-            controller.create(medico);
+            // Aquí podrías actualizar la contraseña si la recibes y quieres hacerlo
 
-            // Redirigir a tables.html con mensaje de éxito
-            response.sendRedirect("tables.html?msg=agregado");
+            controller.edit(medico);
+
+            response.sendRedirect("tables.html?msg=editado");
+
         } catch (Exception e) {
             e.printStackTrace();
             response.sendRedirect("tables.html?error=exception");
